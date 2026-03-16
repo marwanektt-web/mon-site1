@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mon Site Gratuit</title>
+
+<style>
+
+body{
+font-family: Arial;
+background: linear-gradient(135deg,#1e1e1e,#2c3e50);
+color:white;
+text-align:center;
+margin:0;
+}
+
+header{
+background:#111;
+padding:20px;
+font-size:30px;
+}
+
+.container{
+margin-top:60px;
+}
+
+button{
+padding:15px 25px;
+font-size:18px;
+background:#00ffae;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.result{
+margin-top:30px;
+font-size:28px;
+}
+
+footer{
+position:fixed;
+bottom:0;
+width:100%;
+background:#111;
+padding:10px;
+font-size:14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+Mon Générateur de Pseudos 🎮
+</header>
+
+<div class="container">
+
+<h2>Clique pour générer un pseudo</h2>
+
+<button onclick="generate()">Générer</button>
+
+<div class="result" id="result">
+Ton pseudo apparaîtra ici
+</div>
+
+</div>
+
+<footer>
+Site gratuit créé par moi
+</footer>
+
+<script>
+
+let part1 = ["Dark","Ultra","Crazy","Mega","Shadow","Ice","Fire","Ghost"];
+let part2 = ["Wolf","Dragon","Ninja","Tiger","Sniper","King","Hunter"];
+let part3 = ["X","Pro","YT","_","HD"];
+
+function generate(){
+
+let a = part1[Math.floor(Math.random()*part1.length)];
+let b = part2[Math.floor(Math.random()*part2.length)];
+let c = part3[Math.floor(Math.random()*part3.length)];
+let num = Math.floor(Math.random()*999);
+
+document.getElementById("result").innerText = a + b + c + num;
+
+}
+
+</script>
+
+</body>
+</html>

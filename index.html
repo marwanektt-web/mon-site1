@@ -4,47 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MK AI - ChatGPT Gratuit</title>
-
-<!-- SEO -->
-<meta name="description" content="Utilise une IA gratuite comme ChatGPT sans inscription. Rapide, simple et efficace.">
+<title>StudyAI - IA gratuite</title>
 
 <style>
 
+/* GLOBAL */
 body{
 margin:0;
-font-family:system-ui;
-background:#343541;
-color:white;
+font-family:system-ui, -apple-system;
+background:#0f172a;
+color:#e5e7eb;
 display:flex;
 height:100vh;
 }
 
 /* SIDEBAR */
 .sidebar{
-width:260px;
-background:#202123;
-padding:10px;
+width:240px;
+background:#020617;
+padding:15px;
 display:flex;
 flex-direction:column;
+border-right:1px solid #1e293b;
 }
 
 .logo{
 font-size:18px;
-margin-bottom:10px;
+font-weight:bold;
+margin-bottom:15px;
 }
 
 .new-chat{
-padding:10px;
-border:1px solid #555;
+background:#1e293b;
+padding:12px;
+border-radius:10px;
 cursor:pointer;
 margin-bottom:10px;
+text-align:center;
+transition:0.2s;
+}
+
+.new-chat:hover{
+background:#334155;
 }
 
 .history{
 flex:1;
 overflow-y:auto;
 font-size:13px;
+opacity:0.8;
 }
 
 /* CHAT */
@@ -57,58 +65,78 @@ flex-direction:column;
 .chat{
 flex:1;
 overflow-y:auto;
-padding:20px;
+padding:40px;
 }
 
+/* MESSAGES */
 .message{
-padding:15px;
-margin:10px 0;
-border-radius:8px;
-max-width:800px;
+max-width:700px;
+padding:16px;
+margin:12px 0;
+border-radius:14px;
+line-height:1.6;
+animation:fadeIn 0.3s ease;
 }
 
 .user{
-background:#444654;
+background:#2563eb;
 margin-left:auto;
+color:white;
 }
 
 .bot{
-background:#343541;
-border-top:1px solid #555;
+background:#1e293b;
 }
 
 /* INPUT */
 .input-box{
-display:flex;
 padding:15px;
-background:#40414f;
+background:#020617;
+border-top:1px solid #1e293b;
+display:flex;
 }
 
 input{
 flex:1;
-padding:15px;
+padding:14px;
+border-radius:10px;
 border:none;
-border-radius:5px;
-font-size:16px;
+background:#1e293b;
+color:white;
+font-size:15px;
+outline:none;
 }
 
 button{
-padding:15px;
 margin-left:10px;
-background:#19c37d;
+padding:14px 18px;
+background:#22c55e;
 border:none;
+border-radius:10px;
 color:white;
-border-radius:5px;
 cursor:pointer;
+font-weight:bold;
+transition:0.2s;
 }
 
-/* PUB */
-.ad{
-position:absolute;
-bottom:10px;
-left:10px;
-font-size:12px;
-opacity:0.7;
+button:hover{
+transform:scale(1.05);
+}
+
+/* ANIMATION */
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(10px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+/* MOBILE */
+@media(max-width:700px){
+.sidebar{
+display:none;
+}
+.chat{
+padding:20px;
+}
 }
 
 </style>
@@ -117,13 +145,9 @@ opacity:0.7;
 <body>
 
 <div class="sidebar">
-<div class="logo">🤖 MK AI</div>
-<div class="new-chat" onclick="newChat()">+ Nouvelle conversation</div>
+<div class="logo">🚀 StudyAI</div>
+<div class="new-chat" onclick="newChat()">+ Nouvelle</div>
 <div class="history" id="history"></div>
-
-<div class="ad">
-💰 Pub (AdSense ici)
-</div>
 </div>
 
 <div class="chat-container">
@@ -145,6 +169,16 @@ function newChat(){
 document.getElementById("chat").innerHTML = "";
 }
 
+/* effet typing */
+function typeText(element, text){
+let i = 0;
+let interval = setInterval(()=>{
+element.innerHTML += text.charAt(i);
+i++;
+if(i >= text.length) clearInterval(interval);
+},15);
+}
+
 async function send(){
 
 let input = document.getElementById("input");
@@ -152,14 +186,14 @@ let text = input.value;
 
 if(!text) return;
 
-// user
+// message user
 document.getElementById("chat").innerHTML += 
 `<div class="message user">${text}</div>`;
 
-// loading
-let id = "l"+Date.now();
+// message vide pour typing
+let id = "m"+Date.now();
 document.getElementById("chat").innerHTML += 
-`<div class="message bot" id="${id}">⏳ MK AI écrit...</div>`;
+`<div class="message bot" id="${id}"></div>`;
 
 // scroll
 document.getElementById("chat").scrollTop = 
@@ -169,7 +203,7 @@ document.getElementById("chat").scrollHeight;
 conversations.push(text);
 updateHistory();
 
-// IA gratuite
+// appel IA gratuite
 let reply = "";
 
 try{
@@ -182,12 +216,11 @@ body: JSON.stringify({inputs:text})
 let data = await res.json();
 reply = data[0]?.generated_text || "Réponse indisponible";
 }catch{
-reply = "⚠️ IA surchargée, réessaie.";
+reply = "⚠️ IA occupée, réessaie.";
 }
 
-// afficher réponse
-document.getElementById(id).outerHTML =
-`<div class="message bot">${reply}</div>`;
+// effet écriture
+typeText(document.getElementById(id), reply);
 
 input.value = "";
 
@@ -206,3 +239,4 @@ h.innerHTML += `<div>💬 ${c}</div>`;
 
 </body>
 </html>
+

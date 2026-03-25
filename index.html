@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>MK AI Pro</title>
+<title>MK AI</title>
 
 <style>
 
@@ -15,13 +15,13 @@ display:flex;
 }
 
 .sidebar{
-width:200px;
+width:220px;
 background:#020617;
 padding:20px;
 }
 
 .sidebar h2{
-font-size:18px;
+margin-bottom:20px;
 }
 
 .chat-container{
@@ -90,10 +90,10 @@ font-size:12px;
 
 <div class="sidebar">
 <h2>MK AI 🚀</h2>
-<p>Chat IA gratuit</p>
+<p>IA gratuite</p>
 
 <div class="ad">
-💰 Pub ici (Google AdSense)
+💰 Pub ici (AdSense)
 </div>
 </div>
 
@@ -110,7 +110,26 @@ font-size:12px;
 
 <script>
 
-async function send(){
+function fakeAI(text){
+
+text = text.toLowerCase();
+
+if(text.includes("argent")){
+return "💰 Astuce : crée un site viral et ajoute des pubs.";
+}
+
+if(text.includes("site")){
+return "🌍 Utilise GitHub Pages pour créer un site gratuit.";
+}
+
+if(text.includes("bonjour")){
+return "👋 Salut ! Je suis MK AI.";
+}
+
+return "🤖 Réponse intelligente : " + text;
+}
+
+function send(){
 
 let input = document.getElementById("input");
 let text = input.value;
@@ -121,18 +140,17 @@ if(!text) return;
 document.getElementById("chat").innerHTML += 
 `<div class="message user">${text}</div>`;
 
-// appel serveur
-let res = await fetch("https://TON-SERVEUR.onrender.com/chat",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({message:text})
-});
-
-let data = await res.json();
-
 // bot
+setTimeout(()=>{
+let reply = fakeAI(text);
+
 document.getElementById("chat").innerHTML += 
-`<div class="message bot">${data.reply}</div>`;
+`<div class="message bot">${reply}</div>`;
+
+document.getElementById("chat").scrollTop = 
+document.getElementById("chat").scrollHeight;
+
+},500);
 
 input.value = "";
 

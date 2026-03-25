@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>StudyAI</title>
 
 <style>
@@ -13,7 +12,7 @@ body{
 margin:0;
 font-family:system-ui;
 background:#343541;
-color:white;
+color:#ececf1;
 display:flex;
 height:100vh;
 }
@@ -28,17 +27,23 @@ flex-direction:column;
 }
 
 .logo{
-font-size:16px;
+font-size:14px;
 margin-bottom:10px;
 }
 
 .new-chat{
-border:1px solid #555;
+border:1px solid #3e3f4b;
 padding:10px;
+border-radius:6px;
 cursor:pointer;
 margin-bottom:10px;
-text-align:center;
-border-radius:5px;
+}
+
+.history div{
+padding:8px;
+cursor:pointer;
+font-size:13px;
+opacity:0.8;
 }
 
 /* CHAT */
@@ -48,32 +53,46 @@ display:flex;
 flex-direction:column;
 }
 
-/* CHAT AREA */
 .chat{
 flex:1;
 overflow-y:auto;
 display:flex;
 flex-direction:column;
 align-items:center;
-padding:20px;
+padding:30px 0;
 }
 
 /* WRAPPER */
 .message-wrapper{
 width:100%;
-max-width:700px;
+max-width:740px;
+display:flex;
+gap:10px;
 }
 
-/* MESSAGES */
+/* AVATAR */
+.avatar{
+width:30px;
+height:30px;
+border-radius:5px;
+background:#19c37d;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:14px;
+}
+
+/* MESSAGE */
 .message{
 padding:18px;
-margin:5px 0;
-border-radius:6px;
+font-size:15px;
 line-height:1.6;
+flex:1;
 }
 
 .user{
 background:#444654;
+border-radius:8px;
 }
 
 .bot{
@@ -84,50 +103,53 @@ border-top:1px solid #565869;
 /* INPUT */
 .input-box{
 background:#40414f;
-padding:15px;
+padding:20px;
 display:flex;
 justify-content:center;
 }
 
 .input-inner{
 width:100%;
-max-width:700px;
+max-width:740px;
 display:flex;
 }
 
 input{
 flex:1;
-padding:14px;
-border:none;
-border-radius:5px;
-font-size:15px;
+padding:16px;
+background:#40414f;
+border:1px solid #565869;
+border-radius:6px;
+color:white;
 }
 
 button{
 margin-left:10px;
-padding:14px;
+padding:16px;
 background:#19c37d;
 border:none;
+border-radius:6px;
 color:white;
-border-radius:5px;
 cursor:pointer;
 }
 
-/* LOADING */
-.loading{
+/* COPY BUTTON */
+.copy{
+font-size:12px;
 opacity:0.6;
-font-style:italic;
+cursor:pointer;
+margin-top:5px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="sidebar">
 <div class="logo">🤖 StudyAI</div>
-<div class="new-chat" onclick="newChat()">+ Nouvelle conversation</div>
+<div class="new-chat" onclick="newChat()">+ Nouvelle</div>
+<div class="history" id="history"></div>
 </div>
 
 <div class="chat-container">
@@ -145,22 +167,56 @@ font-style:italic;
 
 <script>
 
-/* nouvelle conversation */
+let chats = JSON.parse(localStorage.getItem("chats")) || [];
+
+function save(){
+localStorage.setItem("chats", JSON.stringify(chats));
+updateHistory();
+}
+
+function updateHistory(){
+let h = document.getElementById("history");
+h.innerHTML="";
+chats.slice(-10).forEach((c,i)=>{
+h.innerHTML += `<div onclick="loadChat(${i})">💬 ${c.user}</div>`;
+});
+}
+
+function loadChat(i){
+document.getElementById("chat").innerHTML="";
+let c = chats[i];
+
+addMessage(c.user,"user");
+addMessage(c.bot,"bot");
+}
+
 function newChat(){
-document.getElementById("chat").innerHTML = "";
+document.getElementById("chat").innerHTML="";
 }
 
-/* effet typing */
-function typeText(element, text){
-let i = 0;
-let interval = setInterval(()=>{
-element.innerHTML += text.charAt(i);
-i++;
-if(i >= text.length) clearInterval(interval);
-},15);
+function addMessage(text,type){
+
+let id = "m"+Date.now();
+
+document.getElementById("chat").innerHTML += `
+<div class="message-wrapper">
+<div class="avatar">${type=="user"?"🧑":"🤖"}</div>
+<div>
+<div class="message ${type}" id="${id}">${text}</div>
+${type=="bot"?'<div class="copy" onclick="copyText(`'+text+'`)">Copier</div>':""}
+</div>
+</div>
+`;
+
+document.getElementById("chat").scrollTop =
+document.getElementById("chat").scrollHeight;
 }
 
-/* envoyer message */
+function copyText(t){
+navigator.clipboard.writeText(t);
+alert("Copié !");
+}
+
 async function send(){
 
 let input = document.getElementById("input");
@@ -168,49 +224,37 @@ let text = input.value;
 
 if(!text) return;
 
-// USER
-document.getElementById("chat").innerHTML += 
-`<div class="message-wrapper">
-<div class="message user">${text}</div>
-</div>`;
-
-// BOT (loading)
-let id = "m"+Date.now();
-document.getElementById("chat").innerHTML += 
-`<div class="message-wrapper">
-<div class="message bot loading" id="${id}">⏳ ...</div>
-</div>`;
-
-// scroll
-document.getElementById("chat").scrollTop = 
-document.getElementById("chat").scrollHeight;
+addMessage(text,"user");
 
 // IA gratuite
-let reply = "";
+let reply="";
 
 try{
-let res = await fetch("https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill", {
+let res=await fetch("https://api-inference.huggingface.co/models/facebook/blenderbot-400M-distill",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body: JSON.stringify({inputs:text})
+body:JSON.stringify({inputs:text})
 });
-
-let data = await res.json();
-reply = data[0]?.generated_text || "Réponse indisponible";
+let data=await res.json();
+reply=data[0]?.generated_text || "Réponse indisponible";
 }catch{
-reply = "⚠️ IA occupée, réessaie.";
+reply="⚠️ IA occupée";
 }
 
-// remplacer loading + typing
-document.getElementById(id).innerHTML = "";
-typeText(document.getElementById(id), reply);
+addMessage(reply,"bot");
 
-input.value = "";
+// save
+chats.push({user:text, bot:reply});
+save();
 
+input.value="";
 }
+
+updateHistory();
 
 </script>
 
 </body>
 </html>
+
 
